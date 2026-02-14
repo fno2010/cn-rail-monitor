@@ -1,0 +1,162 @@
+# =============================================================================
+# 12306 Train Ticket Monitor Agent - Configuration Template
+# =============================================================================
+# Copy this file to config.yaml and modify as needed:
+#   cp config.yaml.example config.yaml
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Application Server Settings
+# -----------------------------------------------------------------------------
+app:
+  # Server binding address
+  # Default: "0.0.0.0" (bind to all interfaces)
+  host: "0.0.0.0"
+  
+  # Server port
+  # Default: 8080
+  port: 8080
+
+# -----------------------------------------------------------------------------
+# Query Settings
+# -----------------------------------------------------------------------------
+query:
+  # Polling interval in seconds
+  # How often to query 12306 API for ticket availability
+  # Recommended: 300 (5 minutes) - be respectful to 12306 servers
+  # Default: 300
+  interval: 300
+  
+  # -------------------------------------------------------------------------
+  # Date Range Configuration (choose ONE method)
+  # -------------------------------------------------------------------------
+  
+  # Method 1: Days ahead from today (relative date)
+  # Query tickets for N days ahead from current date
+  # Example: days_ahead: 5 means query today + 1~5 days
+  # Uncomment to use:
+  # days_ahead: 5
+  
+  # Method 2: Specific date range (takes precedence over days_ahead)
+  # Query tickets within a specific date range
+  # Format: YYYY-MM-DD
+  # Example: query from Feb 20 to Feb 25, 2026
+  start_date: "2026-02-20"  # Query start date
+  end_date: "2026-02-25"    # Query end date
+  
+  # -------------------------------------------------------------------------
+  # Price Monitoring (EXPERIMENTAL)
+  # -------------------------------------------------------------------------
+  # Enable price monitoring
+  # NOTE: 12306 public API does not return prices in list query.
+  # Prices are only available after selecting a specific train (requires login).
+  # This option is a placeholder for future implementation.
+  # Default: false
+  enable_price: false
+  
+  # -------------------------------------------------------------------------
+  # Train Type Filter (optional)
+  # -------------------------------------------------------------------------
+  # Filter trains by type. Leave empty to query all types.
+  # Valid types:
+  #   G  - High-Speed (高铁)
+  #   D  - Express (动车)
+  #   K  - Fast (快速)
+  #   T  - Special Express (特快)
+  #   Z  - Direct (直达)
+  # Example:
+  train_types:
+    - "G"    # High-speed
+    - "D"    # Express
+  
+  # -------------------------------------------------------------------------
+  # Routes Configuration
+  # -------------------------------------------------------------------------
+  # Configure origin-destination pairs to monitor
+  # Format:
+  #   name:       Human-readable route name (for logging)
+  #   from_station: Origin station code (see station codes below)
+  #   to_station:   Destination station code
+  #
+  # Example routes:
+  routes:
+    - name: "Beijing to Shanghai"
+      from_station: "BJP"
+      to_station: "SHH"
+    
+    - name: "Shanghai to Hangzhou"
+      from_station: "SHH"
+      to_station: "HZH"
+    
+    - name: "Xinyang to Beijing"
+      from_station: "XYY"
+      to_station: "BJP"
+
+# -----------------------------------------------------------------------------
+# Prometheus Metrics Settings
+# -----------------------------------------------------------------------------
+prometheus:
+  # Enable Prometheus metrics endpoint
+  # Default: true
+  enabled: true
+  
+  # Metrics endpoint path
+  # Prometheus will scrape this endpoint
+  # Default: "/metrics"
+  path: "/metrics"
+
+# -----------------------------------------------------------------------------
+# Telegraf Output Settings
+# -----------------------------------------------------------------------------
+telegraf:
+  # Enable Telegraf output
+  # Output data in InfluxDB line protocol format
+  # Default: true
+  enabled: true
+  
+  # Output mode
+  # Options:
+  #   "stdout" - Print to standard output (good for containerized deployments)
+  #   "file"   - Write to file (good for log file collection)
+  # Default: "stdout"
+  output_mode: "stdout"
+  
+  # Output file path (only used when output_mode is "file")
+  # Make sure the directory exists and has proper write permissions
+  # Default: "/var/log/telegraf/train_metrics.log"
+  output_path: "/var/log/telegraf/train_metrics.log"
+
+# -----------------------------------------------------------------------------
+# Logging Settings
+# -----------------------------------------------------------------------------
+log:
+  # Log level
+  # Options: debug, info, warn, error
+  # Default: "info"
+  level: "info"
+  
+  # Log file path (empty for stdout)
+  # Example: "/var/log/cn-rail-monitor.log"
+  # Default: "" (stdout)
+  file: ""
+
+# =============================================================================
+# Common 12306 Station Codes
+# =============================================================================
+# Use these codes in from_station and to_station fields
+#
+# BJP - 北京 (Beijing)
+# SHH - 上海 (Shanghai)
+# GZQ - 广州 (Guangzhou)
+# SZP - 深圳 (Shenzhen)
+# HZH - 杭州 (Hangzhou)
+# CDW - 成都 (Chengdu)
+# WHH - 武汉 (Wuhan)
+# XAY - 西安 (Xi'an)
+# NJH - 南京 (Nanjing)
+# TJP - 天津 (Tianjin)
+# CQW - 重庆 (Chongqing)
+# XYY - 信阳 (Xinyang)
+#
+# For more station codes, visit: https://www.12306.cn/
+# =============================================================================
