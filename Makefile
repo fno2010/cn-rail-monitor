@@ -91,9 +91,14 @@ dev: build
 # Install systemd user service
 install-systemd-user:
 	@echo "Installing systemd user service..."
+	@# Create config directory and copy default config
+	mkdir -p $(HOME)/.config/cn-rail-monitor
+	@test -f $(HOME)/.config/cn-rail-monitor/config.yaml || cp config.yaml.example $(HOME)/.config/cn-rail-monitor/config.yaml
+	@# Install service file with correct binary and config paths
 	mkdir -p $(SYSTEMD_USER_DIR)
-	sed 's|ExecStart=.*|ExecStart=%h/.local/bin/cn-rail-monitor -config %h/cn-rail-monitor/config.yaml|' systemd/cn-rail-monitor.service > $(SYSTEMD_USER_DIR)/cn-rail-monitor.service
-	@echo "Service installed. Run: systemctl --user daemon-reload && systemctl --user start cn-rail-monitor"
+	sed 's|ExecStart=.*|ExecStart=%h/.local/bin/cn-rail-monitor -config %h/.config/cn-rail-monitor/config.yaml|' systemd/cn-rail-monitor.service > $(SYSTEMD_USER_DIR)/cn-rail-monitor.service
+	@echo "Service installed. Config file: $(HOME)/.config/cn-rail-monitor/config.yaml"
+	@echo "Run: systemctl --user daemon-reload && systemctl --user start cn-rail-monitor"
 
 # Uninstall systemd user service
 uninstall-systemd-user:
@@ -101,7 +106,7 @@ uninstall-systemd-user:
 	systemctl --user stop cn-rail-monitor 2>/dev/null || true
 	systemctl --user disable cn-rail-monitor 2>/dev/null || true
 	rm -f $(SYSTEMD_USER_DIR)/cn-rail-monitor.service
-	@echo "Service uninstalled."
+	@echo "Service uninstalled. Config file preserved at $(HOME)/.config/cn-rail-monitor/config.yaml"
 
 # Enable and start systemd user service
 start-systemd-user:
