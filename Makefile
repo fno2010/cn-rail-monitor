@@ -58,8 +58,10 @@ install: build
 
 # Install binary to user directory (no sudo required)
 install-user: build
-	@echo "Installing $(BINARY_NAME) to $(INSTALL_DIR)..."
-	install -m 755 $(BINARY_DIR)/$(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
+	@echo "Installing $(BINARY_NAME) to $(HOME)/.local/bin..."
+	mkdir -p $(HOME)/.local/bin
+	install -m 755 $(BINARY_DIR)/$(BINARY_NAME) $(HOME)/.local/bin/$(BINARY_NAME)
+	@echo "Binary installed to $(HOME)/.local/bin. Add '$(HOME)/.local/bin' to your PATH if needed."
 
 # =============================================================================
 # Development Targets
@@ -90,7 +92,7 @@ dev: build
 install-systemd-user:
 	@echo "Installing systemd user service..."
 	mkdir -p $(SYSTEMD_USER_DIR)
-	install -m 644 systemd/cn-rail-monitor.service $(SYSTEMD_USER_DIR)/
+	sed 's|ExecStart=.*|ExecStart=%h/.local/bin/cn-rail-monitor -config %h/cn-rail-monitor/config.yaml|' systemd/cn-rail-monitor.service > $(SYSTEMD_USER_DIR)/cn-rail-monitor.service
 	@echo "Service installed. Run: systemctl --user daemon-reload && systemctl --user start cn-rail-monitor"
 
 # Uninstall systemd user service
