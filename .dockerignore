@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+bin/
+*.exe
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local config (use config.yaml.example)
+config.yaml
+
+# Logs
+*.log
+
+# Test coverage
+*.out
+
+# Temporary files
+tmp/
+temp/

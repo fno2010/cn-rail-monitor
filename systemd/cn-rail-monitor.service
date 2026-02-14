@@ -1,0 +1,40 @@
+[Unit]
+Description=12306 Train Ticket Monitor Agent
+Documentation=https://github.com/yourusername/cn-rail-monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Run from user home directory
+WorkingDirectory=%h
+
+# Path to configuration file
+Environment="CONFIG_PATH=%h/cn-rail-monitor/config.yaml"
+
+# Binary location (adjust if installed elsewhere)
+ExecStart=/usr/local/bin/cn-rail-monitor -config %h/cn-rail-monitor/config.yaml
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+# Resource limits (optional)
+# MemoryLimit=100M
+# CPUQuota=50%
+
+# Security hardening (optional)
+# NoNewPrivileges=true
+# PrivateTmp=true
+# ProtectSystem=strict
+# ReadWritePaths=%h/cn-rail-monitor/logs
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cn-rail-monitor
+
+[Install]
+WantedBy=default.target
