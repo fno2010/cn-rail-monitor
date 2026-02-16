@@ -67,9 +67,34 @@ install-user: build
 # Development Targets
 # =============================================================================
 
-# Run tests
+.PHONY: test test-api test-config test-output test-cover test-race
+
+# Run all tests
 test:
 	$(GO) test -v ./...
+
+# Run API tests only
+test-api:
+	$(GO) test -v ./internal/api/...
+
+# Run config tests only
+test-config:
+	$(GO) test -v ./internal/config/...
+
+# Run output tests only
+test-output:
+	$(GO) test -v ./internal/output/...
+
+# Run tests with coverage report
+test-cover:
+	$(GO) test -v -coverprofile=coverage.out ./...
+	@echo "Coverage report:"
+	$(GO) tool cover -func=coverage.out
+	@rm -f coverage.out
+
+# Run tests with race detector
+test-race:
+	$(GO) test -race -v ./...
 
 # Run with custom config
 run:
@@ -188,7 +213,14 @@ help:
 	@echo "  clean                  - Clean build artifacts"
 	@echo "  install                - Install binary to system (requires sudo)"
 	@echo "  install-user           - Install binary to user directory"
-	@echo "  test                   - Run tests"
+	@echo ""
+	@echo "  test                   - Run all tests"
+	@echo "  test-api               - Run API tests only"
+	@echo "  test-config            - Run config tests only"
+	@echo "  test-output            - Run output tests only"
+	@echo "  test-cover             - Run tests with coverage report"
+	@echo "  test-race              - Run tests with race detector"
+	@echo ""
 	@echo "  run                    - Run the application"
 	@echo "  run-config             - Run with config.yaml"
 	@echo "  dev                    - Development mode with auto-rebuild"

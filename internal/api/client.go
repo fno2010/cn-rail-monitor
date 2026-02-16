@@ -14,9 +14,11 @@ import (
 )
 
 const (
-	APIBase  = "https://kyfw.12306.cn"
-	InitURL  = APIBase + "/otn/leftTicket/init"
-	QueryURL = APIBase + "/otn/leftTicket/query"
+	APIBase = "https://kyfw.12306.cn"
+	InitURL = APIBase + "/otn/leftTicket/init"
+	// queryG returns JSON for high-speed trains (G/D/C)
+	// queryA returns JSON for all train types
+	QueryURL = APIBase + "/otn/leftTicket/queryG"
 )
 
 var (
@@ -87,15 +89,14 @@ type Price struct {
 }
 
 func NewClient(enablePrice bool) *Client {
+	EnsureStationCodesLoaded()
+
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{
 		Transport: transport,
 		Timeout:   30 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
 	}
 
 	return &Client{
@@ -194,36 +195,6 @@ func (c *Client) QueryTickets(fromStation, toStation, date string) ([]TicketInfo
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	var initialResp map[string]interface{}
-	if err := json.Unmarshal(body, &initialResp); err == nil {
-		if cUrl, ok := initialResp["c_url"].(string); ok && cUrl != "" {
-			log.Printf("Redirecting to: %s", cUrl)
-			req, err = http.NewRequest("GET", APIBase+"/otn/"+cUrl+"?"+
-				"leftTicketDTO.train_date="+date+
-				"&leftTicketDTO.from_station="+fromCode+
-				"&leftTicketDTO.to_station="+toCode+
-				"&purpose_codes=ADULT", nil)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create redirect request: %w", err)
-			}
-			req.Header.Set("Cookie", cookies)
-			req.Header.Set("Referer", InitURL)
-			req.Header.Set("Accept", "application/json")
-			req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-
-			resp, err = c.httpClient.Do(req)
-			if err != nil {
-				return nil, fmt.Errorf("redirect request failed: %w", err)
-			}
-			defer resp.Body.Close()
-
-			body, err = io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, fmt.Errorf("failed to read redirect response: %w", err)
-			}
-		}
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -515,42 +486,12 @@ func extractPrices(ypInfo, seatDiscountInfo string, fields []string) []Price {
 }
 
 func convertToStationCode(station string) string {
-	stationCodes := map[string]string{
-		"BJP": "北京",
-		"BJ":  "北京",
-		"SHH": "上海",
-		"SH":  "上海",
-		"HZH": "杭州",
-		"HZ":  "杭州",
-		"GZQ": "广州",
-		"GZH": "广州",
-		"GZ":  "广州",
-		"SZP": "深圳",
-		"SZH": "深圳",
-		"SZ":  "深圳",
-		"CDW": "成都",
-		"CD":  "成都",
-		"WHH": "武汉",
-		"WH":  "武汉",
-		"XAY": "西安",
-		"XA":  "西安",
-		"NJH": "南京",
-		"NJ":  "南京",
-		"TJP": "天津",
-		"TJ":  "天津",
-		"CQW": "重庆",
-		"CQ":  "重庆",
-		"XYY": "信阳",
+	if code := GetStationCodeByName(station); code != "" {
+		return code
 	}
 
 	if len(station) >= 2 && station == strings.ToUpper(station) {
 		return station
-	}
-
-	for code, name := range stationCodes {
-		if strings.Contains(name, station) || strings.Contains(station, name) {
-			return code
-		}
 	}
 
 	return station

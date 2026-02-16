@@ -75,22 +75,22 @@ query:
   # Configure origin-destination pairs to monitor
   # Format:
   #   name:       Human-readable route name (for logging)
-  #   from_station: Origin station code (see station codes below)
-  #   to_station:   Destination station code
+  #   from_station: Origin station code or city name (e.g., "XUN" or "信阳")
+  #   to_station:   Destination station code or city name
   #
-  # Example routes:
+  # Example routes (using city names - recommended):
   routes:
     - name: "Beijing to Shanghai"
-      from_station: "BJP"
-      to_station: "SHH"
+      from_station: "北京"
+      to_station: "上海"
     
     - name: "Shanghai to Hangzhou"
-      from_station: "SHH"
-      to_station: "HZH"
+      from_station: "上海"
+      to_station: "杭州"
     
     - name: "Xinyang to Beijing"
-      from_station: "XYY"
-      to_station: "BJP"
+      from_station: "信阳"
+      to_station: "北京"
 
 # -----------------------------------------------------------------------------
 # Prometheus Metrics Settings
@@ -143,20 +143,34 @@ log:
 # =============================================================================
 # Common 12306 Station Codes
 # =============================================================================
-# Use these codes in from_station and to_station fields
+# Use city names (recommended) or station codes in from_station/to_station.
 #
-# BJP - 北京 (Beijing)
-# SHH - 上海 (Shanghai)
-# GZQ - 广州 (Guangzhou)
-# SZP - 深圳 (Shenzhen)
-# HZH - 杭州 (Hangzhou)
-# CDW - 成都 (Chengdu)
-# WHH - 武汉 (Wuhan)
-# XAY - 西安 (Xi'an)
-# NJH - 南京 (Nanjing)
-# TJP - 天津 (Tianjin)
-# CQW - 重庆 (Chongqing)
-# XYY - 信阳 (Xinyang)
+# City name examples:
+#   北京, 上海, 广州, 深圳, 杭州, 成都, 武汉, 西安, 南京, 天津, 重庆, 信阳
+#
+# Station code examples:
+#   BJP - 北京 (Beijing)
+#   SHH - 上海 (Shanghai)
+#   GZQ - 广州 (Guangzhou)
+#   SZP - 深圳 (Shenzhen)
+#   HZH - 杭州 (Hangzhou)
+#   CDW - 成都 (Chengdu)
+#   WHH - 武汉 (Wuhan)
+#   XAY - 西安 (Xi'an)
+#   NJH - 南京 (Nanjing)
+#   TJP - 天津 (Tianjin)
+#   CQW - 重庆 (Chongqing)
+#   XUN - 信阳 (Xinyang)
 #
 # For more station codes, visit: https://www.12306.cn/
 # =============================================================================
+
+# -----------------------------------------------------------------------------
+# Station Settings
+# -----------------------------------------------------------------------------
+station:
+  # Station code cache file path
+  # The program will auto-fetch station codes from 12306 on first run.
+  # Default: <executable-directory>/station_codes.json
+  # Example: cache_path: "/home/user/.cache/cn-rail-monitor/station_codes.json"
+  # cache_path: ""

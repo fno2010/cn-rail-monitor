@@ -15,6 +15,7 @@ type Config struct {
 	Prometheus PrometheusConfig `yaml:"prometheus"`
 	Telegraf   TelegrafConfig   `yaml:"telegraf"`
 	Log        LogConfig        `yaml:"log"`
+	Station    StationConfig    `yaml:"station"`
 }
 
 // AppConfig holds server configuration
@@ -46,6 +47,11 @@ type RouteConfig struct {
 type PrometheusConfig struct {
 	Enabled bool   `yaml:"enabled"`
 	Path    string `yaml:"path"`
+}
+
+// StationConfig holds station code cache settings
+type StationConfig struct {
+	CachePath string `yaml:"cache_path"` // Custom cache file path (optional)
 }
 
 // TelegrafConfig holds Telegraf output settings

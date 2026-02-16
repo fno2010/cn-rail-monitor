@@ -33,6 +33,11 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
+	// Set custom station cache path if configured
+	if cfg.Station.CachePath != "" {
+		api.SetStationCachePath(cfg.Station.CachePath)
+	}
+
 	// Initialize logger
 	initLogger(cfg.Log)
 
