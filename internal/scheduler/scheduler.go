@@ -68,11 +68,13 @@ func (s *Scheduler) queryAllRoutes() {
 			if err != nil {
 				log.Printf("[ERROR] Query failed for %s->%s on %s: %v",
 					route.FromStation, route.ToStation, dateStr, err)
-				tickets = s.client.QueryTicketsWithMockData(route.FromStation, route.ToStation, dateStr)
-			} else if len(tickets) == 0 {
-				log.Printf("[WARN] No tickets found for %s->%s on %s (API returned empty), using mock data",
+				s.metricsCollector.RecordError()
+				continue
+			}
+
+			if len(tickets) == 0 {
+				log.Printf("[INFO] No tickets found for %s->%s on %s",
 					route.FromStation, route.ToStation, dateStr)
-				tickets = s.client.QueryTicketsWithMockData(route.FromStation, route.ToStation, dateStr)
 			}
 
 			// Record metrics
